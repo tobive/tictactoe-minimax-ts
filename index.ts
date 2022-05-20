@@ -50,6 +50,31 @@ class TicTacToe {
         if (row == 2 && col == 2) return 9;
     }
 
+    public isSquareEmpty(square: number): boolean {
+        switch (square) {
+            case 1:
+                return this.gameBoard[0][0] === null;
+            case 2:
+                return this.gameBoard[0][1] === null;
+            case 3:
+                return this.gameBoard[0][2] === null;
+            case 4:
+                return this.gameBoard[1][0] === null;
+            case 5:
+                return this.gameBoard[1][1] === null;
+            case 6:
+                return this.gameBoard[1][2] === null;
+            case 7:
+                return this.gameBoard[2][0] === null;
+            case 8:
+                return this.gameBoard[2][1] === null;
+            case 9:
+                return this.gameBoard[2][2] === null;
+            default:
+                throw Error('Square input should be between 1-9');
+        }
+    }
+
     public isWinning(player: Player, board: Board = this.gameBoard) {
         if (board[0][0] === player) {
             if (board[0][1] === player) {
@@ -134,19 +159,6 @@ class TicTacToe {
         }
     }
 
-    public moveAI() {
-        this.turn++;
-        let nextMove = this.miniMax(Player.O, this.gameBoard, undefined)[1];
-        console.log('NEXT MOVE BY AI:', nextMove)
-        this.writeBoard(nextMove, Player.O, this.gameBoard);
-        this.printBoard();
-        if (this.isWinning(Player.O, this.gameBoard)) {
-            console.log("  YOU LOSE")
-            this.gameOver = true;
-            return;
-        }
-    }
-
     // player is the player that will take the next move
     // move is the next move that player will take
     public miniMax(player: Player, board: Board, move: Move): [Score, Move] {
@@ -193,26 +205,52 @@ class TicTacToe {
         return 0;
     }
 
-    // Start the game
-    public async start() {
-        const prompt = Prompt();
-        console.log(" --- GAME START --- ");
+    public moveAI() {
+        console.log('￪-- AI Turn\n')
+        this.turn++;
+        let nextMove = this.miniMax(Player.O, this.gameBoard, undefined)[1];
+        console.log('NEXT MOVE BY AI:', nextMove)
+        this.writeBoard(nextMove, Player.O, this.gameBoard);
         this.printBoard();
-        while(!this.gameOver) {
-            let square: number;
+        if (this.isWinning(Player.O, this.gameBoard)) {
+            console.log("  YOU LOSE")
+            this.gameOver = true;
+            return;
+        }
+    }
+
+    public movePlayer() {
+        const prompt = Prompt();
+        let isValid = false;
+        let square: number;
+        while (!isValid) {
             let input = prompt('Press 1-9 to pick the next move, 0 to minimax, x to quit\n');
             if (input === 'x') this.gameOver = true;
             square = parseInt(input);
-            this.writeBoard(square, Player.X, this.gameBoard);
-            this.turn++;
-            this.printBoard();
-            // AI turn
+            if (this.isSquareEmpty(square)) {
+                isValid = true;
+            } else {
+                console.log('Choose another empty square!')
+            }
+        }
+        
+        this.writeBoard(square, Player.X, this.gameBoard);
+        this.turn++;
+        this.printBoard();
+    }
+
+    // Start the game
+    public async start() {
+        console.log(" --- GAME START --- ");
+        this.printBoard();
+        while(!this.gameOver) {
+            this.movePlayer();
             if (this.isWinning(Player.X, this.gameBoard)) {
                 console.log('**** YOU WIN ****');
                 this.gameOver = true;
                 break;
             }
-            console.log('￪-- AI Turn\n')
+            // AI turn
             this.moveAI();
         }
         console.log("\n --- GAME OVER --- ");
