@@ -125,6 +125,15 @@ class TicTacToe {
         return false;
     }
 
+    public isBoardFull(board: Board): boolean {
+        for (let row of board) {
+            for (let col of row) {
+                if (col === null) return false
+            }
+        }
+        return true;
+    }
+
     public writeBoard(square: number, player: Player, board: Board) {
         switch (square) {
             case 1:
@@ -206,12 +215,12 @@ class TicTacToe {
     }
 
     public moveAI() {
-        console.log('￪-- AI Turn\n')
         this.turn++;
         let nextMove = this.miniMax(Player.O, this.gameBoard, undefined)[1];
-        console.log('NEXT MOVE BY AI:', nextMove)
+        console.log('\nNEXT MOVE BY AI:', nextMove)
         this.writeBoard(nextMove, Player.O, this.gameBoard);
         this.printBoard();
+        console.log('￪-- AI Turn\n')
         if (this.isWinning(Player.O, this.gameBoard)) {
             console.log("  YOU LOSE")
             this.gameOver = true;
@@ -224,8 +233,11 @@ class TicTacToe {
         let isValid = false;
         let square: number;
         while (!isValid) {
-            let input = prompt('Press 1-9 to pick the next move, 0 to minimax, x to quit\n');
-            if (input === 'x') this.gameOver = true;
+            let input = prompt('Press 1-9 to pick the next move, 0 to minimax, q to quit\n');
+            if (input === 'q') {
+                this.gameOver = true;
+                process.exit(1);
+            }
             square = parseInt(input);
             if (this.isSquareEmpty(square)) {
                 isValid = true;
@@ -252,6 +264,11 @@ class TicTacToe {
             }
             // AI turn
             this.moveAI();
+            if (this.isBoardFull(this.gameBoard)) {
+                console.log('**** DRAW ****');
+                this.gameOver = true;
+                break;
+            }
         }
         console.log("\n --- GAME OVER --- ");
     }
@@ -259,10 +276,3 @@ class TicTacToe {
 
 let ttt = new TicTacToe();
 ttt.start();
-// let board = [
-//     ['O', 'X', 'X'],
-//     ['X', 'O', null],
-//     ['O', null, null],
-//  ];
-
-//  console.log(ttt.miniMax(Player.O, board, undefined));
